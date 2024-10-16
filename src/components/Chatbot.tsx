@@ -6,15 +6,16 @@ import "./Chatbot.scss";
 
 import { Chats } from "../models/chats.tsx";
 import { ChatTemplate } from "./ChatTemplate.tsx";
+import { useChat } from "../hooks/use-chat.ts";
 
 const Chatbot: FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [userInput, userInputResponse] = useState<string>(); // user input
   const [chats, setChats] = useState<Chats>(new Chats());
+  useChat(chats, setChats);
 
+  // send the user response to the server
   const sendMessage = (request: string) => {
-    //TODO: send the user response to the server
-
     // render user response
     setChats(
       chats.addMessage({
@@ -27,8 +28,6 @@ const Chatbot: FC = () => {
         },
       })
     );
-    // get the response from the server
-    // set the bot response
   };
 
   const handleSubmit = () => {
@@ -40,6 +39,7 @@ const Chatbot: FC = () => {
     }
     sendMessage(userInput);
   };
+
   return (
     <div className="chat-container">
       <ChatTemplate chats={chats} />
