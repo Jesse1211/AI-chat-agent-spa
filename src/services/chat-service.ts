@@ -7,13 +7,20 @@ export const chatService = {
     message: Chats,
     abortSignal?: AbortSignal
   ): Promise<ResponseMessage> {
-    const response = await axios.post<ResponseMessage>(
-      `chat`,
-      {
-        message: message,
-      },
-      { signal: abortSignal }
-    );
-    return response.data;
+    const res: ResponseMessage = {
+      id: message.messages.length + 1,
+      $type: "response",
+      message: "result.message",
+    };
+
+    return res;
+    // const response = await axios.post<ResponseMessage>(
+    //   `chat`,
+    //   {
+    //     message: message,
+    //   },
+    //   { signal: abortSignal }
+    // );
+    // return response.data;
   },
 };

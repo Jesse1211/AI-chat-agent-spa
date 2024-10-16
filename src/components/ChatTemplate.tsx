@@ -20,8 +20,8 @@ export const ChatTemplate: FC<{
 
   return (
     <div className="message-container" ref={bodyRef}>
-      {chats.messages.map((chat) => (
-        <MessageTemplate key={chat.id} message={chat} />
+      {chats.messages.map((chat, key) => (
+        <MessageTemplate key={key} message={chat} />
       ))}
     </div>
   );

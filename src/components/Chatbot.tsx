@@ -7,37 +7,48 @@ import "./Chatbot.scss";
 import { Chats } from "../models/chats.tsx";
 import { ChatTemplate } from "./ChatTemplate.tsx";
 import { useChat } from "../hooks/use-chat.ts";
+import { RequestMessage, ResponseMessage } from "../models/types.tsx";
 
-const Chatbot: FC = () => {
+const initialMessages: ResponseMessage = {
+  id: 1,
+  $type: "response",
+  message:
+    "Hi there. If you're here, that means you're looking for a job. Tell me, what's your name?",
+};
+
+export const Chatbot: FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [userInput, userInputResponse] = useState<string>(); // user input
-  const [chats, setChats] = useState<Chats>(new Chats());
+  const [chats, setChats] = useState<Chats>({
+    messages: [initialMessages],
+  });
   useChat(chats, setChats);
 
-  // send the user response to the server
-  const sendMessage = (request: string) => {
-    // render user response
-    setChats(
-      chats.addMessage({
+  const handleSubmit = () => {
+    if (inputRef && inputRef.current) {
+      const userInput = inputRef.current.value;
+
+      if (!userInput.trim()) {
+        inputRef.current.focus();
+        return;
+      }
+
+      const newMessage: RequestMessage = {
         id: chats.messages.length + 1,
         $type: "request",
-        message: request,
+        message: userInput,
         user: {
           id: 1,
           username: "User",
         },
-      })
-    );
-  };
+      };
+      setChats({
+        messages: [...chats.messages, newMessage],
+      });
 
-  const handleSubmit = () => {
-    if (!userInput) {
-      if (inputRef && inputRef.current) {
-        inputRef.current.focus();
-      }
-      return;
+      inputRef.current.value = "";
+      inputRef.current.focus();
     }
-    sendMessage(userInput);
+    return;
   };
 
   return (
@@ -51,18 +62,15 @@ const Chatbot: FC = () => {
         }}
       >
         <Input
-          ref={inputRef}
+          slotProps={{ input: { ref: inputRef } }}
           required
           endDecorator={
             <Button type="submit" color="primary">
               <Send />
             </Button>
           }
-          onChange={(event) => userInputResponse(event.target.value)}
         />
       </form>
     </div>
   );
 };
-
-export default Chatbot;

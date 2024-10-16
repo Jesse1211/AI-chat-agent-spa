@@ -10,22 +10,39 @@ export function useChat(
   busy: boolean;
   error?: Error;
 } {
-  const [busy, setBusy] = useState<boolean>(true);
+  const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
 
+    const lastMessage = chats.messages[chats.messages.length - 1];
+    if (lastMessage.$type === "response") {
+      return;
+    }
+
+    setBusy(true);
+
     chatService
       .getAIRespond(chats, signal)
       .then((result: ResponseMessage) => {
         if (!signal.aborted) {
-          onSetChats(chats.addMessage(result));
+          onSetChats({
+            messages: [...chats.messages, result],
+          });
         }
       })
-      .catch((e: Error) => signal.aborted || setError(e))
-      .finally(() => signal.aborted || setBusy(false));
+      .catch((e: Error) => {
+        if (!signal.aborted) {
+          setError(e);
+        }
+      })
+      .finally(() => {
+        if (!signal.aborted) {
+          setBusy(false);
+        }
+      });
 
     return () => abortController.abort();
   }, [chats, onSetChats]);
